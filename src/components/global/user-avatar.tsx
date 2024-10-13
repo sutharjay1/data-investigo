@@ -12,6 +12,7 @@ import { useTheme } from "@/provider/theme-provider";
 import { BrushIcon, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { P } from "../ui/typography";
+import Hint from "./hint";
 
 const UserDropdownMenu = () => {
   const { user, logout } = useAuth();
@@ -23,23 +24,25 @@ const UserDropdownMenu = () => {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="flex w-full items-center gap-3 px-3 py-2"
+          className="flex w-fit items-center gap-3 p-0 py-2 md:w-full md:px-3"
         >
-          <Avatar className="h-7 w-7">
+          <Avatar className="h-8 w-8 md:h-7 md:w-7">
             {user?.image ? (
               <AvatarImage src={user.image} />
             ) : (
-              <AvatarFallback className="bg-gradient-to-tl from-[#2BC0E4] to-[#EAECC6] text-white">
+              <AvatarFallback className="bg-gradient-to-tl from-[#2BC0E4] to-[#EAECC6] text-zinc-900">
                 {user?.username ? user.username[0].toUpperCase() : "?"}
               </AvatarFallback>
             )}
           </Avatar>
 
-          <div className="min-w-0 flex-1">
-            <P className="truncate text-sm font-medium leading-none text-slate-900 dark:text-slate-200">
-              {user?.email ?? "No Email"}
-            </P>
-          </div>
+          <Hint label={`Hello, ${user?.username}`} side="bottom">
+            <div className="hidden min-w-0 flex-1 md:flex">
+              <P className="truncate text-sm font-medium leading-none text-slate-900 dark:text-slate-200">
+                {user?.email ?? "No Email"}
+              </P>
+            </div>
+          </Hint>
         </Button>
       </DropdownMenuTrigger>
 

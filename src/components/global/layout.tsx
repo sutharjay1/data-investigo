@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Wifi,
 } from "lucide-react";
+import Hint from "./hint";
 
 const menuItems = [
   {
@@ -222,9 +223,11 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="border-slate-6 hidden h-[60px] items-center justify-end border-b px-6 md:flex">
           <div className="hidden items-center gap-4 md:flex">
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
-            </Button>
+            <Hint label="Notifications" side="bottom">
+              <Button variant="ghost" size="icon">
+                <Bell className="h-5 w-5" />
+              </Button>
+            </Hint>
             <UserDropdownMenu />
           </div>
         </header>
@@ -237,16 +240,18 @@ const Layout = ({ children }: LayoutProps) => {
               alt="logo"
             />
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="flex items-center"
-            onClick={handleNavClick}
-          >
-            <div className="flex items-center gap-4">
-              <Menu className="" />
-            </div>
-          </Button>
+          <div className="flex items-center justify-end gap-3">
+            <Hint label="Notifications" side="bottom">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="flex items-center justify-center"
+              >
+                <Bell className="h-5 w-5" />
+              </Button>
+            </Hint>
+            <UserDropdownMenu />
+          </div>
         </header>
 
         <main className="flex-1 overflow-y-auto">
