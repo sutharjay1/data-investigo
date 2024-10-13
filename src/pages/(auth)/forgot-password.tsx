@@ -103,7 +103,10 @@ const ForgotPassword = () => {
     <>
       <div className="absolute inset-0 z-10">
         <video className="h-full w-full object-cover" autoPlay loop muted>
-          <source src="https://res.cloudinary.com/sutharjay/video/upload/v1728813623/freelance_assets/qcufoiqytxoybsz7vpdw.mp4" type="video/mp4" />
+          <source
+            src="https://res.cloudinary.com/sutharjay/video/upload/v1728813623/freelance_assets/qcufoiqytxoybsz7vpdw.mp4"
+            type="video/mp4"
+          />
           Your browser does not support the video tag.
         </video>
       </div>
@@ -147,9 +150,9 @@ const ForgotPassword = () => {
               <Button
                 onClick={handleForgotPassword}
                 className="flex w-fit justify-self-start"
-                disabled={form.formState.isSubmitting}
+                disabled={mutation.isPending}
               >
-                {form.formState.isSubmitting ? "Sending..." : "Send Reset Link"}
+                {mutation.isPending ? "Sending..." : "Send Reset Link"}
               </Button>
             </CardFooter>
           </Card>

@@ -1,19 +1,16 @@
 import InnerLayout from "@/components/global/inner-layout";
 import Loading from "@/components/global/loading";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { H3, P } from "@/components/ui/typography";
+import { P } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
-import { Wrench } from "lucide-react";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 
 const Domain = lazy(() => import("./domain"));
@@ -95,34 +92,7 @@ const Monitor = () => {
       case "IP_INFO":
         return <WhatIsMyIP />;
       default:
-        return (
-          <Card>
-            <CardContent className="flex min-h-60 items-center justify-center p-2">
-              <div className="h-60 w-full rounded-t-lg border border-dashed">
-                <div className="flex h-full flex-col items-center justify-center space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <Wrench className="h-8 w-8" />
-                    <H3 className="text-2xl font-bold tracking-tight">
-                      Select a Tool
-                    </H3>
-                  </div>
-                  <P className="mt-4 max-w-md text-center text-muted-foreground">
-                    Choose a tool from the dropdown above to get started with
-                    your analysis.
-                  </P>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button
-                className="flex w-fit justify-self-start"
-                onClick={handleViewAllTools}
-              >
-                View All Tools
-              </Button>
-            </CardFooter>
-          </Card>
-        );
+        return null;
     }
   };
 
