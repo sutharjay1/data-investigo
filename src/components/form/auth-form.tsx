@@ -558,7 +558,7 @@ const AuthForm = () => {
         className={cn(
           "relative block h-[calc(100vh-24rem)] w-full overflow-hidden rounded-lg bg-background md:hidden md:h-[32rem]",
 
-          mode === "LOGIN" ? "h-[calc(100vh-28rem)]" : "h-[calc(100vh-20rem)]",
+          mode === "LOGIN" ? "h-[calc(100vh-20rem)]" : "h-[calc(100vh-16rem)]",
         )}
       >
         <motion.div
@@ -591,7 +591,14 @@ const AuthForm = () => {
           }}
         >
           <div className="mx-auto w-full max-w-md text-text">
-            <CardContent className="">
+            <CardContent>
+              <CardTitle>
+                <P className="text-left md:mb-4">
+                  {mode === "LOGIN"
+                    ? "Login to your account"
+                    : "Sign up for an account"}
+                </P>
+              </CardTitle>
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
