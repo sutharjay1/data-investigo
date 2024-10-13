@@ -558,7 +558,7 @@ const AuthForm = () => {
         className={cn(
           "relative block h-[calc(100vh-24rem)] w-full overflow-hidden rounded-lg bg-background md:hidden md:h-[32rem]",
 
-          mode === "LOGIN" ? "h-[calc(100vh-18rem)]" : "h-[calc(100vh-14rem)]",
+          mode === "LOGIN" ? "h-[calc(100vh-18rem)]" : "h-[calc(100vh-12rem)]",
         )}
       >
         <motion.div
