@@ -61,9 +61,9 @@
 
 @layer base {
   :root {
-    /* --base-color: 240 33.33% 2.94%; */
-    --base-color: 240 33.33% 4.94%;
-    /* Your base #05050a in HSL */
+    /* --base-color: 240 33.33% 4.94%; */
+    /* --base-color:  272.12 70.83% 5% 3.5%; */
+    --base-color: 228.28 60% 5%;
     --background: 0 0% 100%;
     --foreground: var(--base-color);
     --card: 0 0% 98%;

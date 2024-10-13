@@ -1,21 +1,32 @@
 import { Toaster } from "@/components/ui/toaster";
-import { Suspense, lazy } from "react";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { Suspense, lazy, useEffect } from "react";
+import {
+  BrowserRouter,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import Loading from "./components/global/loading";
 import NavBar from "./components/global/nav-bar";
 import Auth from "./pages/(auth)/auth";
-import VerifyEmail from "./pages/(auth)/email-verify";
+
 import GoogleCallback from "./pages/(auth)/google-callback";
-import User from "./pages/(dashboard)/user";
+
 import { GuestRoute, PrivateRoute } from "./pages/route-guard";
 import Layout from "./components/global/layout";
+import { useAuth } from "./provider/google-provider";
 
-const Home = lazy(() => import("./pages/home"));
+const VerifyEmail = lazy(() => import("./pages/(auth)/email-verify"));
+const ResetPassword = lazy(() => import("./pages/(auth)/reset-password"));
+
 const Monitor = lazy(() => import("./pages/(dashboard)/_sections/monitor"));
 const SSLMonitoring = lazy(
   () => import("./pages/(dashboard)/_sections/ssl-monitoring"),
 );
 const ForgotPassword = lazy(() => import("./pages/(auth)/forgot-password"));
+
+const User = lazy(() => import("./pages/(dashboard)/user"));
 
 const App = () => (
   <BrowserRouter>
@@ -25,26 +36,41 @@ const App = () => (
 
 const AppContent = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (location.pathname === "/") {
+      navigate(`/auth?mode=login`);
+    }
+  }, [location]);
+
+  const noLayoutRoutes = [
+    "/",
+    "/auth",
+    "/auth/google/callback",
+    "/forgot-password",
+    "/reset-password",
+    "/confirm-email",
+  ];
+
+  const isNoLayout = noLayoutRoutes.some((path) =>
+    location.pathname.startsWith(path),
+  );
+
+  const { user } = useAuth();
 
   return (
     <div className="font-poppins flex h-full min-h-screen w-full flex-col text-muted-foreground">
-      {(location.pathname === "/" || location.pathname === "/auth") && (
-        <NavBar />
-      )}
       <main className="font-poppins w-full flex-1">
-        {location.pathname !== "/" &&
-        location.pathname !== "/auth" &&
-        location.pathname !== "/auth/google/callback" &&
-        location.pathname !== "/forgot-password" ? (
+        {isNoLayout && !user ? (
+          <Suspense fallback={<Loading />}>
+            <AppRouter />
+          </Suspense>
+        ) : (
           <Layout>
             <Suspense fallback={<Loading />}>
               <AppRouter />
             </Suspense>
           </Layout>
-        ) : (
-          <Suspense fallback={<Loading />}>
-            <AppRouter />
-          </Suspense>
         )}
       </main>
       <Toaster />
@@ -54,17 +80,16 @@ const AppContent = () => {
 
 const AppRouter = () => (
   <Routes>
-    <Route path="/" element={<Home />} />
-
     <Route element={<GuestRoute />}>
       <Route path="/auth" element={<Auth />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/confirm-email/:token" element={<VerifyEmail />} />
       <Route path="/auth/google/callback" element={<GoogleCallback />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
     </Route>
 
     <Route element={<PrivateRoute />}>
-      <Route path="/u" element={<User />} />{" "}
+      <Route path="/u" element={<User />} />
       <Route path="/u/monitor" element={<Monitor />} />
       <Route path="/u/ssl-monitoring" element={<SSLMonitoring />} />
       {/* <Route path="/u/domain" element={<Domain />} /> */}

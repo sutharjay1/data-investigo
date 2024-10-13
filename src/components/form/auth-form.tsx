@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { motion } from "framer-motion";
- 
+
 import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { useForm } from "react-hook-form";
@@ -15,7 +15,7 @@ import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import * as z from "zod";
-import { Card, CardContent } from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import {
   Form,
   FormControl,
@@ -26,13 +26,24 @@ import {
 } from "../ui/form";
 import { H2, P } from "../ui/typography";
 import { RiLoader2Fill } from "react-icons/ri";
+import { Separator } from "../ui/separator";
 
 const authSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z
     .string()
     .min(8, { message: "Password must be at least 8 characters" }),
+  // username: z
+  //   .string()
+  //   .min(3, { message: "Username must be at least 3 characters" }),
+  // confirmPassword: z.string().min(8, {
+  //   message: "Password must be at least 8 characters",
+  // }),
 });
+// .refine((data) => data.password === data.confirmPassword, {
+//   message: "Passwords do not match",
+//   path: ["confirmPassword"],
+// });
 
 const registerUser = async (values: TAuthSchema) => {
   const response = await axios.post(
@@ -169,6 +180,8 @@ const AuthForm = () => {
   });
 
   const onSubmit = (values: TAuthSchema) => {
+    console.log(values);
+
     if (mode === "LOGIN") {
       loginMutation(values);
     } else if (mode === "SIGNUP") {
@@ -320,13 +333,13 @@ const AuthForm = () => {
 
   return (
     <>
-      <div className="relative hidden h-[calc(100vh-24rem)] w-full overflow-hidden rounded-lg bg-background md:block md:h-[32rem]">
+      <div className="relative hidden h-screen w-full overflow-hidden rounded-lg bg-background md:block md:h-[34rem]">
         <motion.div
           className={cn(
-            "absolute bottom-0 top-0 order-2 flex h-full w-full flex-col justify-center bg-background p-2 md:left-0 md:order-1 md:w-1/2 md:p-8",
+            "absolute bottom-0 top-0 order-2 flex h-full w-full flex-col justify-center p-2 md:left-0 md:order-1 md:w-1/2 md:p-8",
             mode === "LOGIN"
-              ? "md:order-1 md:rounded-l-lg md:rounded-br-none"
-              : "md:order-2 md:rounded-r-lg md:rounded-bl-none",
+              ? "bg-cyan-950/15 md:order-1 md:rounded-l-lg md:rounded-br-none"
+              : "bg-purple-950/15 md:order-2 md:rounded-r-lg md:rounded-bl-none",
           )}
           variants={desktopFormVariants}
           initial={false}
@@ -334,7 +347,15 @@ const AuthForm = () => {
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
           <div className="mx-auto w-full max-w-md text-text">
-            <CardContent className="">
+            <CardContent className="px-0">
+              <CardTitle>
+                <P className="text-left md:mb-4">
+                  {mode === "LOGIN"
+                    ? "Login to your account"
+                    : "Sign up for an account"}
+                </P>
+              </CardTitle>
+
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
@@ -433,9 +454,9 @@ const AuthForm = () => {
                       type="submit"
                       variant="outline"
                       className="w-full"
-                      disabled={isLoginLoading || isSignupLoading}
+                      disabled={isLoginLoading}
                     >
-                      {isLoginLoading || isSignupLoading ? (
+                      {isLoginLoading ? (
                         <>
                           <RiLoader2Fill className="mr-2 h-4 w-4 animate-spin" />
                           {mode === "LOGIN" ? "Signing in..." : "Signing up..."}
@@ -446,6 +467,17 @@ const AuthForm = () => {
                         "Sign Up"
                       )}
                     </Button>
+
+                    <div className="relative py-2">
+                      <Separator className="w-full" />
+                      <div
+                        className={cn(
+                          "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+                        )}
+                      >
+                        <P className="px-2 text-text">OR</P>
+                      </div>
+                    </div>
 
                     <Button
                       variant="outline"
@@ -489,21 +521,24 @@ const AuthForm = () => {
 
         <motion.div
           className={cn(
-            "absolute right-0 top-0 order-1 hidden h-fit w-full flex-col items-center justify-center bg-teal-500/45 p-8 text-text md:order-2 md:flex md:h-full md:w-1/2",
+            "absolute right-0 top-0 order-1 hidden h-full w-full flex-col items-center justify-center p-8 text-text md:order-2 md:flex md:h-full md:w-1/2",
 
             mode === "LOGIN"
-              ? "md:order-2 md:rounded-r-lg md:rounded-tl-none"
-              : "md:order-1 md:rounded-l-lg md:rounded-tr-none",
+              ? "bg-gradient-to-b from-cyan-700/75 via-cyan-600/35 to-background md:order-2 md:rounded-r-lg md:rounded-tl-none"
+              : "bg-gradient-to-b from-purple-700/75 via-purple-600/35 to-background md:order-1 md:rounded-l-lg md:rounded-tr-none",
           )}
           variants={desktopWelcomeVariants}
           initial={false}
           animate={mode.toLowerCase()}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
-          <H2 className="text-3xl font-bold">Welcome back!</H2>
+          <H2 className="text-left text-3xl font-bold">
+            {mode === "LOGIN" ? "Welcome back!" : "Welcome!"}
+          </H2>
           <P className="text-center md:mb-8">
-            Welcome back! We are so happy to have you here. It's great to see
-            you again. We hope you had a safe and enjoyable time away.
+            {mode === "LOGIN"
+              ? "Welcome back! We are so happy to have you here. It's great to see you again. We hope you had a safe and enjoyable time away."
+              : "Welcome! We are so happy to have you here. It's great to see you again. We hope you had a safe and enjoyable time away."}
           </P>
           <P className="hidden gap-2 text-base text-text md:flex">
             {mode === "LOGIN"
@@ -721,10 +756,13 @@ const AuthForm = () => {
           animate={mode.toLowerCase()}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
-          <H2 className="text-3xl font-bold">Welcome back!</H2>
+          <H2 className="text-left text-3xl font-bold">
+            {mode === "LOGIN" ? "Welcome back!" : "Welcome!"}
+          </H2>
           <P className="text-center md:mb-8">
-            Welcome back! We are so happy to have you here. It's great to see
-            you again. We hope you had a safe and enjoyable time away.
+            {mode === "LOGIN"
+              ? "Welcome back! We are so happy to have you here. It's great to see you again. We hope you had a safe and enjoyable time away."
+              : "Welcome! We are so happy to have you here. It's great to see you again. We hope you had a safe and enjoyable time away."}
           </P>
           <P className="hidden gap-2 text-base text-text md:flex">
             {mode === "LOGIN"

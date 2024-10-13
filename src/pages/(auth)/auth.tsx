@@ -17,10 +17,13 @@ const Auth = () => {
   }, [searchParams]);
 
   return (
-    <div className="relative flex h-[calc(100vh-64px)] items-center justify-center">
+    <div className="relative flex h-screen items-center justify-center">
       <div className="absolute inset-0 z-10">
         <video className="h-full w-full object-cover" autoPlay loop muted>
-          <source src="https://res.cloudinary.com/sutharjay/video/upload/v1728813623/freelance_assets/qcufoiqytxoybsz7vpdw.mp4" type="video/mp4" />
+          <source
+            src="https://res.cloudinary.com/sutharjay/video/upload/v1728813623/freelance_assets/qcufoiqytxoybsz7vpdw.mp4"
+            type="video/mp4"
+          />
           Your browser does not support the video tag.
         </video>
       </div>
