@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react";
+import { RiLoader2Fill } from "react-icons/ri";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -13,7 +13,7 @@ const Loading = ({ className }: Props) => {
         className,
       )}
     >
-      <Loader2 className="h-10 w-10 animate-spin" />
+      <RiLoader2Fill className="h-10 w-10 animate-spin" />
     </div>
   );
 };

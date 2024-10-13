@@ -11,8 +11,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+ 
 import { P } from "@/components/ui/typography";
+import { RiLoader2Fill } from "react-icons/ri";
 
 const tokenSchema = z.object({
   token: z.string().nonempty("Token is required"),
@@ -70,7 +71,7 @@ const VerifyEmail = () => {
           )}
           {mutation.isPending && (
             <div className="flex flex-col items-center space-y-2">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+              <RiLoader2Fill className="h-8 w-8 animate-spin text-blue-500" />
               <P className="text-text">Verifying email... </P>
             </div>
           )}

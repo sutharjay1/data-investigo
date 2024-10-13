@@ -13,8 +13,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+ 
 import { useSearchParams } from "react-router-dom";
+import { RiLoader2Fill } from "react-icons/ri";
 
 interface AuthResponse {
   token: string;
@@ -72,7 +73,7 @@ export default function GoogleCallback() {
           )}
           {mutation.isPending && (
             <div className="flex items-center justify-center space-x-2">
-              <Loader2 className="h-6 w-6 animate-spin" />
+              <RiLoader2Fill className="h-6 w-6 animate-spin" />
               <p>Processing OAuth code...</p>
             </div>
           )}

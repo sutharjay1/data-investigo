@@ -34,6 +34,7 @@ import axios from "axios";
 import { Copy, Globe, Loader2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
+import { RiLoader2Fill } from "react-icons/ri";
 import { z } from "zod";
 
 interface SubDomainResponse {
@@ -294,7 +295,7 @@ const SubDomainDiscovery = () => {
               className="flex w-fit justify-self-start"
             >
               {isLoading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <RiLoader2Fill className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Globe className="mr-2 h-4 w-4" />
               )}
