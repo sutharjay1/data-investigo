@@ -565,8 +565,8 @@ const AuthForm = () => {
           className={cn(
             "order-2 flex h-full w-full flex-col justify-center bg-background p-2 md:left-0 md:order-1 md:w-1/2 md:p-8",
             mode === "LOGIN"
-              ? "md:order-1 md:rounded-l-lg md:rounded-br-none"
-              : "md:order-2 md:rounded-r-lg md:rounded-bl-none",
+              ? "bg-gradient-to-b from-cyan-700/75 via-cyan-600/35 to-background md:order-1 md:rounded-l-lg md:rounded-br-none"
+              : "bg-gradient-to-b from-purple-700/75 via-purple-600/35 to-background md:order-2 md:rounded-r-lg md:rounded-bl-none",
           )}
           initial={false}
           variants={{
