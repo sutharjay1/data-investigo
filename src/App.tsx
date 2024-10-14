@@ -8,7 +8,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import Loading from "./components/global/loading";
-import NavBar from "./components/global/nav-bar";
+
 import Auth from "./pages/(auth)/auth";
 
 import GoogleCallback from "./pages/(auth)/google-callback";
@@ -25,8 +25,10 @@ const SSLMonitoring = lazy(
   () => import("./pages/(dashboard)/_sections/ssl-monitoring"),
 );
 const ForgotPassword = lazy(() => import("./pages/(auth)/forgot-password"));
-
+const MonitorDomain = lazy(() => import("./pages/(monitor)/monitor-domain"));
 const User = lazy(() => import("./pages/(dashboard)/user"));
+
+const MonitorNewHttp = lazy(() => import("./pages/(monitor)/monitor-new-http"));
 
 const App = () => (
   <BrowserRouter>
@@ -91,6 +93,8 @@ const AppRouter = () => (
     <Route element={<PrivateRoute />}>
       <Route path="/u" element={<User />} />
       <Route path="/u/monitor" element={<Monitor />} />
+      <Route path="/monitor" element={<MonitorDomain />} />
+      <Route path="/monitor/new/http" element={<MonitorNewHttp />} />
       <Route path="/u/ssl-monitoring" element={<SSLMonitoring />} />
       {/* <Route path="/u/domain" element={<Domain />} /> */}
       {/* <Route path="/u/sub-domain-discovery" element={<SubDomainDiscovery />} />

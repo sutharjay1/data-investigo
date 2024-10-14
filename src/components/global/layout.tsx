@@ -6,7 +6,7 @@ import { DomainMode } from "@/types";
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import { IoIosGlobe } from "react-icons/io";
 import {
   Bell,
   ChevronDown,
@@ -29,6 +29,12 @@ const menuItems = [
   },
   {
     icon: <MonitorIcon className="h-5 w-5" />,
+    label: "Monitor",
+    href: "/monitor",
+  },
+  {
+    // icon: <MonitorIcon className="h-5 w-5" />,
+    icon: <IoIosGlobe className="h-5 w-5" />,
     label: "Domain",
     subItems: [
       { icon: <Globe className="h-5 w-5" />, mode: DomainMode.MONITOR },

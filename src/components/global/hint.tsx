@@ -29,10 +29,7 @@ const Hint = ({
         side={side}
         sideOffset={sideOffset}
         align={align}
-        className={cn(
-          "z-[500] border-zinc-900 px-2 py-1 text-text",
-          className,
-        )}
+        className={cn("z-[500] border-zinc-900 px-2 py-1 text-text", className)}
         alignOffset={alignOffset}
       >
         <P className={cn("font-semibold capitalize")}>{label}</P>
