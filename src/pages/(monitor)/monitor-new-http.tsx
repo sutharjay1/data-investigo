@@ -208,7 +208,7 @@ const MonitorNewHttp = () => {
     enabled: false,
   });
 
-  const onSubmit = async (values: MonitorSiteFormValues) => {
+  const onSubmit = async () => {
     refetch();
   };
 
