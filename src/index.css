@@ -63,7 +63,8 @@
   :root {
     /* --base-color: 240 33.33% 4.94%; */
     /* --base-color:  272.12 70.83% 5% 3.5%; */
-    --base-color: 228.28 60% 5%;
+    /* --base-color: 228.28 60% 5%; */
+    --base-color: 218, 39%, 5%;
     --background: 0 0% 100%;
     --foreground: var(--base-color);
     --card: 0 0% 98%;

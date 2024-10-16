@@ -18,14 +18,19 @@ const InnerLayout = ({
     <div className="scrollContainer relative pb-10 pt-4">
       {/* <div className="pointer-events-none fixed left-0 right-0 top-0 z-10 h-20 bg-gradient-to-b from-rose-600 to-transparent opacity-80" /> */}
 
-      <div className="relative z-20 mx-auto flex max-w-5xl items-center justify-between px-6 pb-2">
+      <div className="relative z-20 mx-auto flex max-w-5xl items-center justify-between px-3 pb-2 md:px-6">
         <h1 className="text-2xl font-bold leading-[34px] tracking-[-0.416px] text-text md:text-4xl">
           {label}
         </h1>
         {button}
       </div>
 
-      <div className={cn("relative z-20 mx-auto max-w-5xl px-6", className)}>
+      <div
+        className={cn(
+          "relative z-20 mx-auto max-w-5xl px-3 md:px-6",
+          className,
+        )}
+      >
         {children}
       </div>
     </div>

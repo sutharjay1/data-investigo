@@ -17,10 +17,14 @@ const Card = React.forwardRef<
 ));
 Card.displayName = "Card";
 
+interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  badgeClassName?: string;
+}
+
 const CardHeader = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
+  React.HTMLAttributes<HTMLDivElement> & CardHeaderProps
+>(({ className, badgeClassName, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
@@ -29,7 +33,12 @@ const CardHeader = React.forwardRef<
     )}
     {...props}
   >
-    <div className="absolute left-6 top-0 h-2 w-32 rounded-b-full bg-primary/30 dark:bg-primary/10" />{" "}
+    <div
+      className={cn(
+        "absolute left-6 top-0 h-2 w-32 rounded-b-full",
+        badgeClassName ? badgeClassName : "bg-primary/30 dark:bg-primary/10",
+      )}
+    />{" "}
     {props.children}
   </div>
 ));
@@ -99,7 +108,7 @@ const CardBody = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "border-slate-6 flex items-center justify-between border-y p-4",
+      "border-slate-6 flex items-center justify-between border-y",
       className,
     )}
     {...props}

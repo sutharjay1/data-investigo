@@ -16,6 +16,7 @@ import GoogleCallback from "./pages/(auth)/google-callback";
 import { GuestRoute, PrivateRoute } from "./pages/route-guard";
 import Layout from "./components/global/layout";
 import { useAuth } from "./provider/google-provider";
+import MonitorID from "./pages/(monitor)/monitor-id";
 
 const VerifyEmail = lazy(() => import("./pages/(auth)/email-verify"));
 const ResetPassword = lazy(() => import("./pages/(auth)/reset-password"));
@@ -96,6 +97,7 @@ const AppRouter = () => (
       <Route path="/monitor" element={<MonitorDomain />} />
       <Route path="/monitor/new/http" element={<MonitorNewHttp />} />
       <Route path="/u/ssl-monitoring" element={<SSLMonitoring />} />
+      <Route path="/monitor/:id" element={<MonitorID />} />
       {/* <Route path="/u/domain" element={<Domain />} /> */}
       {/* <Route path="/u/sub-domain-discovery" element={<SubDomainDiscovery />} />
       <Route path="/u/what-is-my-ip" element={<WhatIsMyIP />} />

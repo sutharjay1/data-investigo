@@ -12,7 +12,6 @@ export default {
       colors: {
         text: "hsl(var(--text))",
         textSecondary: "hsl(var(--text-secondary))",
-
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -52,6 +51,19 @@ export default {
           3: "hsl(var(--chart-3))",
           4: "hsl(var(--chart-4))",
           5: "hsl(var(--chart-5))",
+        },
+      },
+      animation: {
+        ripple: "ripple var(--duration,2s) ease calc(var(--i, 0)*.2s) infinite",
+      },
+      keyframes: {
+        ripple: {
+          "0%, 100%": {
+            transform: "translate(-50%, -50%) scale(1)",
+          },
+          "50%": {
+            transform: "translate(-50%, -50%) scale(0.9)",
+          },
         },
       },
     },

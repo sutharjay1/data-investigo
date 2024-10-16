@@ -104,7 +104,6 @@ export type SSL_Monitoring_Response = {
 //   HTTPS = "https",
 // }
 
-
 export type Protocol = "http" | "https";
 
 export type Interval =
@@ -200,5 +199,3 @@ export type Interval =
   | "7 days"
   | "30 days"
   | "365 days";
-
-
