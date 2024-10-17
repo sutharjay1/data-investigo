@@ -1,50 +1,47 @@
-# React + TypeScript + Vite
+# Data Investigo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<div align="center">
 
-Currently, two official plugins are available:
+  <h1>Unleash the Power of Data Analysis with Data Investigo</h1>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+  <p>
+    <a href="#features">Features</a> •
+    <a href="#quick-start">Quick Start</a> •
+    <a href="#installation">Installation</a> •
+    <a href="#usage">Usage</a> •
+    <a href="#configuration">Configuration</a> •
+    <a href="#contributing">Contributing</a> •
+    <a href="#license">License</a>
+  </p>
 
-## Expanding the ESLint configuration
+  [![GitHub license](https://img.shields.io/github/license/sutharjay1/data-investigo)](https://github.com/sutharjay1/data-investigo/blob/main/LICENSE)
+  [![GitHub stars](https://img.shields.io/github/stars/sutharjay1/data-investigo)](https://github.com/sutharjay1/data-investigo/stargazers)
+  [![GitHub issues](https://img.shields.io/github/issues/sutharjay1/data-investigo)](https://github.com/sutharjay1/data-investigo/issues)
+  [![GitHub pull requests](https://img.shields.io/github/issues-pr/sutharjay1/data-investigo)](https://github.com/sutharjay1/data-investigo/pulls)
+</div>
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## 🚀 Features
 
-- Configure the top-level `parserOptions` property like this:
+- **📊 Comprehensive Data Analysis**: Dive deep into data with advanced filters, sorting options, and data aggregation capabilities.
+- **📈 Interactive Visualizations**: Generate and customize charts, graphs, and dashboards for insightful data presentations.
+- **🔎 Smart Insights & Anomaly Detection**: Automatically detect trends and outliers in your data, helping you make data-driven decisions faster.
+- **💾 Easy Data Import/Export**: Import data from various formats like CSV, Excel, and databases, and export processed insights effortlessly.
+- **🖥️ Platform Independent**: Runs seamlessly on Windows, macOS, and Linux environments.
+- **🔒 Secure and Scalable**: Built with best practices for data security, including encryption and role-based access control.
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-});
-```
+## 🏁 Quick Start
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+Get started with **Data Investigo** in just a few steps:
 
-```js
-// eslint.config.js
-import react from "eslint-plugin-react";
+```bash
+# Clone the repository
+git clone https://github.com/DataInvestigo-Inc/Datainvestigo-app-ui.git
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: "18.3" } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs["jsx-runtime"].rules,
-  },
-});
-```
+# Navigate to the project directory
+cd data_investigo
+
+# Install dependencies
+npm install
+
+# Start the application in development mode
+npm run dev

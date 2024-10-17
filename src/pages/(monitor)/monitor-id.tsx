@@ -34,7 +34,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { P } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
@@ -57,18 +56,9 @@ import {
   AreaChart,
   Bar,
   BarChart,
-  Brush,
-  Cell,
-  Legend,
   Line,
   LineChart,
-  Pie,
-  PieChart,
-  RadialBar,
-  RadialBarChart,
   ResponsiveContainer,
-  Scatter,
-  ScatterChart,
   XAxis,
   YAxis,
 } from "recharts";

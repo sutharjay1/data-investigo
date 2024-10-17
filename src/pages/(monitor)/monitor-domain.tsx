@@ -10,12 +10,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -25,8 +23,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -37,26 +33,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { P } from "@/components/ui/typography";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import {
-  CircleDotDashed,
-  MoreVertical,
-  PlusIcon,
-  RefreshCcw,
-  TrashIcon,
-} from "lucide-react";
+import { MoreVertical, PlusIcon, TrashIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export interface ResponseBody {
@@ -73,20 +55,11 @@ export interface ResponseBody {
   tags: string[];
 }
 
-import {
-  Edit2,
-  Users,
-  Tag,
-  Rss,
-  Copy,
-  Pause,
-  RotateCcw,
-  Trash2,
-} from "lucide-react";
-import { RiToolsFill } from "react-icons/ri";
-import { cn } from "@/lib/utils";
 import Alert from "@/components/global/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import { Copy, Edit2, Pause, RotateCcw, Rss, Tag, Trash2 } from "lucide-react";
+import { RiToolsFill } from "react-icons/ri";
 
 export const siteDropdownItems = [
   {
@@ -229,284 +202,6 @@ export default function MonitorDomain() {
     filteredSites?.length === selectedSites.length && filteredSites?.length > 0;
 
   return (
-    // <InnerLayout
-    //   label="Monitor Domain"
-    //   className="container mx-auto space-y-3 pb-10 pt-0"
-    //   button={
-    //     <Button
-    //       className="h-9 w-fit py-0"
-    //       variant="default"
-    //       onClick={() => navigate("/monitor/new/http")}
-    //     >
-    //       <PlusIcon className="mr-2 h-4 w-4" strokeWidth={3} />
-    //       <P className="text-sm font-medium text-zinc-100 dark:text-zinc-900 [&:not(:first-child)]:mt-0">
-    //         New Monitor
-    //       </P>
-    //     </Button>
-    //   }
-    // >
-    //   <P className="text-lg text-text/90">
-    //     DNS Tools lets you perform various DNS lookups, domain checks, and other
-    //     utilities. Select a tool to get started.
-    //   </P>
-
-    //   <Card className="w-full shadow-md">
-    //     <CardHeader>
-    //       <CardTitle className="flex items-center justify-between">
-    //         <P className="text-2xl font-bold text-muted-foreground">
-    //           Site Monitors
-    //         </P>
-    //         <div className="flex items-center space-x-2">
-    //           <Input
-    //             placeholder="Search sites..."
-    //             value={searchTerm}
-    //             onChange={(e) => setSearchTerm(e.target.value)}
-    //             className="w-64"
-    //           />
-    //           <Select value={sortOrder} onValueChange={setSortOrder}>
-    //             <SelectTrigger className="w-[120px]">
-    //               <SelectValue placeholder="Sort order" />
-    //             </SelectTrigger>
-    //             <SelectContent>
-    //               <SelectItem value="down">Down first</SelectItem>
-    //               <SelectItem value="up">Up first</SelectItem>
-    //             </SelectContent>
-    //           </Select>
-    //           <Button
-    //             variant="outline"
-    //             size="icon"
-    //             onClick={() => refetch()}
-    //             title="Refresh"
-    //           >
-    //             <RefreshCcw className="h-4 w-4" />
-    //           </Button>
-    //         </div>
-    //       </CardTitle>
-    //     </CardHeader>
-    //     <CardContent>
-    //       {isLoading ? (
-    //         <div className="space-y-4">
-    //           <div className="h-8 w-full animate-pulse rounded bg-gray-200"></div>
-    //           <div className="h-8 w-full animate-pulse rounded bg-gray-200"></div>
-    //           <div className="h-8 w-full animate-pulse rounded bg-gray-200"></div>
-    //         </div>
-    //       ) : isError ? (
-    //         <div className="text-red-500">
-    //           Error fetching sites: {error.message}
-    //         </div>
-    //       ) : filteredSites && filteredSites.length > 0 ? (
-    //         // <Table>
-    //         //   <TableHeader>
-    //         //     <TableRow>
-    //         //       <TableHead className="w-[50px]">
-    //         //         <Checkbox
-    //         //           checked={isAllSelected}
-    //         //           onCheckedChange={handleSelectAll}
-    //         //         />
-    //         //       </TableHead>
-    //         //       <TableHead>Name</TableHead>
-    //         //       <TableHead>URL</TableHead>
-    //         //       <TableHead>Status</TableHead>
-    //         //       <TableHead>Last Checked</TableHead>
-    //         //       <TableHead>Actions</TableHead>
-    //         //     </TableRow>
-    //         //   </TableHeader>
-    //         //   <TableBody>
-    //         //     {filteredSites.map((site) => (
-    //         //       <TableRow key={site.id}>
-    //         //         <TableCell>
-    //         //           <Checkbox
-    //         //             checked={selectedSites.includes(site)}
-    //         //             onCheckedChange={(checked) =>
-    //         //               handleSelectSite(site, checked as boolean)
-    //         //             }
-    //         //           />
-    //         //         </TableCell>
-    //         //         <TableCell>{site.name}</TableCell>
-    //         //         <TableCell>{site.url[0]}</TableCell>
-    //         //         <TableCell>
-    //         //           <Badge
-    //         //             variant={
-    //         //               site.status === "Status Up"
-    //         //                 ? "success"
-    //         //                 : site.status === "Status Down"
-    //         //                   ? "destructive"
-    //         //                   : "secondary"
-    //         //             }
-    //         //           >
-    //         //             {site.status}
-    //         //           </Badge>
-    //         //         </TableCell>
-    //         //         <TableCell>
-    //         //           {site.last_checked
-    //         //             ? new Date(site.last_checked).toLocaleString()
-    //         //             : "N/A"}
-    //         //         </TableCell>
-    //         //         <TableCell>
-    //         //           <AlertDialog>
-    //         //             <AlertDialogTrigger asChild>
-    //         //               <Button variant="ghost" size="sm" className="w-fit">
-    //         //                 <TrashIcon className="h-4 w-4" />
-    //         //               </Button>
-    //         //             </AlertDialogTrigger>
-    //         //             <AlertDialogContent>
-    //         //               <AlertDialogHeader>
-    //         //                 <AlertDialogTitle>
-    //         //                   Are you absolutely sure?
-    //         //                 </AlertDialogTitle>
-    //         //                 <AlertDialogDescription>
-    //         //                   This action cannot be undone. This will
-    //         //                   permanently delete the monitor for {site.url[0]}.
-    //         //                 </AlertDialogDescription>
-    //         //               </AlertDialogHeader>
-    //         //               <AlertDialogFooter>
-    //         //                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-    //         //                 <AlertDialogAction
-    //         //                   onClick={() => handleDelete(site)}
-    //         //                 >
-    //         //                   Delete
-    //         //                 </AlertDialogAction>
-    //         //               </AlertDialogFooter>
-    //         //             </AlertDialogContent>
-    //         //           </AlertDialog>
-    //         //         </TableCell>
-    //         //       </TableRow>
-    //         //     ))}
-    //         //   </TableBody>
-    //         // </Table>
-
-    //         // <div className="space-y-4">
-    //         //   {filteredSites.map((site) => (
-    //         //     <Link to={`/monitor/${site.id}`}>
-    //         //       <Card>
-    //         //         <CardContent className="group flex items-center space-x-4">
-    //         //           {/* <Checkbox
-    //         //             checked={isAllSelected}
-    //         //             onCheckedChange={handleSelectAll}
-    //         //             className="hidden group-hover:flex"
-    //         //           /> */}
-
-    //         //           <Checkbox
-    //         //             checked={selectedSites.includes(site)}
-    //         //             onCheckedChange={(checked) =>
-    //         //               handleSelectSite(site, checked as boolean)
-    //         //             }
-    //         //             className="hidden group-hover:flex"
-    //         //           />
-
-    //         //           <div className="flex items-center space-x-2">
-    //         //             <CardTitle>{site.name}</CardTitle>
-    //         //             <CardDescription>{site.url[0]}</CardDescription>
-    //         //           </div>
-    //         //         </CardContent>
-    //         //       </Card>
-    //         //     </Link>
-    //         //   ))}
-    //         // </div>
-    //         <div className="space-y-4">
-    //           {filteredSites.map((site) => (
-    //             <Card key={site.id} className="group">
-    //               <CardContent className="flex flex-1 items-center space-x-6">
-    //                 <div className="flex flex-1 items-center space-x-2">
-    //                   <Checkbox
-    //                     checked={selectedSites.includes(site)}
-    //                     className="hidden group-hover:flex"
-    //                     onCheckedChange={(checked) =>
-    //                       handleSelectSite(site, checked as boolean)
-    //                     }
-    //                   />
-    //                   <Badge
-    //                     variant={
-    //                       site.status === "Status Up"
-    //                         ? "success"
-    //                         : site.status === "Status Down"
-    //                           ? "destructive"
-    //                           : "secondary"
-    //                     }
-    //                     className="h-4 w-1 rounded-full"
-    //                   />
-
-    //                   <div className="flex items-center justify-center space-x-2">
-    //                     <div className="flex flex-col space-y-1">
-    //                       <CardTitle className="text-xl font-bold">
-    //                         {site.name}
-    //                       </CardTitle>
-    //                       <CardDescription>{site.url[0]}</CardDescription>
-    //                     </div>
-
-    //                     <P className="text-sm text-text [&:not(:first-child)]:mt-0">
-    //                       Last Checked:{" "}
-    //                       {site.last_checked
-    //                         ? new Date(site.last_checked).toLocaleString()
-    //                         : "N/A"}
-    //                     </P>
-    //                   </div>
-    //                 </div>
-    //                 <div className="flex justify-end space-x-2">
-    //                   {/* <AlertDialog>
-    //                     <AlertDialogTrigger asChild>
-    //                       <Button variant="ghost" size="sm" className="w-fit">
-    //                         <TrashIcon className="h-4 w-4" />
-    //                       </Button>
-    //                     </AlertDialogTrigger>
-    //                     <AlertDialogContent>
-    //                       <AlertDialogHeader>
-    //                         <AlertDialogTitle>
-    //                           Are you absolutely sure?
-    //                         </AlertDialogTitle>
-    //                         <AlertDialogDescription>
-    //                           This action cannot be undone. This will
-    //                           permanently delete the monitor for {site.url[0]}.
-    //                         </AlertDialogDescription>
-    //                       </AlertDialogHeader>
-    //                       <AlertDialogFooter>
-    //                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-    //                         <AlertDialogAction
-    //                           onClick={() => handleDelete(site)}
-    //                         >
-    //                           Delete
-    //                         </AlertDialogAction>
-    //                       </AlertDialogFooter>
-    //                     </AlertDialogContent>
-    //                   </AlertDialog> */}
-
-    //                   <DropdownMenu>
-    //                     <DropdownMenuTrigger>
-    //                       <Button variant="ghost" size="sm" className="w-fit">
-    //                         <CircleDotDashed className="h-4 w-4" />
-    //                       </Button>
-    //                     </DropdownMenuTrigger>
-    //                     <DropdownMenuContent>
-    //                       {siteDropdownItems.map((item) => (
-    //                         <DropdownMenuItem key={item.label}>
-    //                           {item.label}
-    //                         </DropdownMenuItem>
-    //                       ))}
-    //                     </DropdownMenuContent>
-    //                   </DropdownMenu>
-    //                 </div>
-    //               </CardContent>
-    //             </Card>
-    //           ))}
-    //         </div>
-    //       ) : (
-    //         <div className="py-4 text-center">
-    //           No monitored sites found. Add a new monitor to get started.
-    //         </div>
-    //       )}
-    //     </CardContent>
-    //     <CardFooter className="justify-between">
-    //       <P className="text-sm text-muted-foreground">
-    //         Total sites: {filteredSites?.length || 0}
-    //       </P>
-    //       <P className="text-sm text-muted-foreground">
-    //         Selected sites: {selectedSites.length} /{" "}
-    //         {filteredSites?.length || 0}
-    //       </P>
-    //     </CardFooter>
-    //   </Card>
-    // </InnerLayout>
-
     <InnerLayout
       label="Monitor Domain"
       className="container mx-auto space-y-3 pb-10 pt-0"
