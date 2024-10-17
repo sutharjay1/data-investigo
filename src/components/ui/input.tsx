@@ -17,14 +17,15 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           // Light theme
           "bg-neutral-300/50 text-text",
           "placeholder:text-textSecondary/80",
-          "border border-border",
-          "focus:ring-3 focus:border-2 focus:border-ring focus:ring-accent",
+          "border border-text/15",
+          "focus:ring-3 focus:border-2 focus:border-ring/15 focus:ring-accent",
 
           // Dark theme
-          "dark:bg-neutral-900/75 dark:text-text",
+          // "dark:bg-neutral-900/75 dark:text-text",
           "dark:placeholder:text-textSecondary/80",
-          "dark:border-border",
+          "focus:border focus:dark:border-2 focus:dark:border-ring focus:dark:ring-accent",
           "dark:focus:ring-3 dark:focus:border-neutral-900/75 dark:focus:ring-accent",
+          "flex w-full items-center justify-start bg-slate-200/5 hover:text-accent-foreground",
 
           // File input styles
           "file:border-0 file:bg-transparent file:text-sm file:font-medium",

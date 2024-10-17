@@ -42,6 +42,7 @@ import axios from "axios";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
+  Edit,
   PauseIcon,
   PlayIcon,
   RefreshCcw,
@@ -64,8 +65,9 @@ import {
 } from "recharts";
 import { toast } from "sonner";
 import { ResponseBody } from "./monitor-domain";
+import Hint from "@/components/global/hint";
 
-interface SiteInfo {
+export interface SiteInfo {
   id: number;
   maintenance: boolean;
   paused: boolean;
@@ -485,26 +487,52 @@ export default function MonitorID() {
               </div>
 
               <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => refetch()}
-                  title="Refresh"
-                  className="flex w-full items-center justify-center gap-4 rounded-md p-2 text-sm text-text/90"
+                <Hint
+                  label="Refresh"
+                  side="bottom"
+                  align="start"
+                  alignOffset={-10}
                 >
-                  <RefreshCcw className="h-4 w-4" />
-                </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => refetch()}
+                    title="Refresh"
+                    className="flex w-full items-center justify-center gap-4 rounded-md p-2 text-sm text-text/90"
+                  >
+                    <RefreshCcw className="h-4 w-4" />
+                  </Button>
+                </Hint>
+                <Hint label="Edit" side="bottom" align="center" alignOffset={5}>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => navigate(`/monitor/${monitorDomain}/edit`)}
+                    title="Edit"
+                    className="flex w-full items-center justify-center gap-4 rounded-md p-2 text-sm text-text/90"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </Hint>
+
                 <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="flex w-full items-center justify-center gap-4 rounded-md p-2 text-sm text-text/90"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <TrashIcon className="h-4 w-4 text-red-600" />
-                    </Button>
-                  </AlertDialogTrigger>
+                  <Hint
+                    label="Delete"
+                    side="bottom"
+                    align="end"
+                    alignOffset={10}
+                  >
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="flex w-full items-center justify-center gap-4 rounded-md p-2 text-sm text-text/90"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <TrashIcon className="h-4 w-4 text-red-600" />
+                      </Button>
+                    </AlertDialogTrigger>
+                  </Hint>
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>

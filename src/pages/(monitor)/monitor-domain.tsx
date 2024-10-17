@@ -268,8 +268,7 @@ export default function MonitorDomain() {
               {filteredSites.map((site) => (
                 <Card
                   key={site.id}
-                  className="group cursor-pointer"
-                  // onClick={() => handleSelectSite(site, true)}
+                  className="group cursor-pointer shadow-transparent md:shadow-transparent"
                 >
                   <CardHeader
                     className="p-0"
