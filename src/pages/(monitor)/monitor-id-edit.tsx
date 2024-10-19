@@ -24,6 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { P } from "@/components/ui/typography";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -33,14 +35,8 @@ import { useForm } from "react-hook-form";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import * as z from "zod";
-
-// Define the SiteInfo type
-type SiteInfo = {
-  url: string[];
-  tags: string[];
-  interval: number;
-  friendly_name: string;
-};
+import { SiteInfo } from "./monitor-id";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   protocol: z.enum(["http", "https"]),
@@ -289,6 +285,34 @@ const editMonitor = async (data: {
   return response.data;
 };
 
+const setMaintenance = async ({
+  protocol,
+  domain,
+  maintenance,
+}: {
+  protocol: string;
+  domain: string;
+  maintenance: boolean;
+}): Promise<any> => {
+  const formData = new URLSearchParams();
+  formData.append("protocol", protocol);
+  formData.append("domain", domain);
+  formData.append("maintenance", maintenance.toString());
+
+  const response = await axios.post(
+    "https://domain-api.datainvestigo.com/set_maintenance",
+    formData,
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        accept: "application/json",
+      },
+    },
+  );
+
+  return response.data;
+};
+
 const MonitorIDEdit: React.FC = () => {
   const { id: monitorDomain } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
@@ -296,6 +320,7 @@ const MonitorIDEdit: React.FC = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const protocol = searchParams.get("protocol") || "https";
+  const tab = searchParams.get("tab");
 
   useEffect(() => {
     if (!searchParams.get("protocol")) {
@@ -329,9 +354,38 @@ const MonitorIDEdit: React.FC = () => {
 
   const mutation = useMutation({
     mutationFn: editMonitor,
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["monitor", monitorDomain] });
-      toast.success("Monitor updated successfully", {
+      toast.success(data?.status, {
+        duration: 3000,
+        richColors: true,
+        style: {
+          backgroundColor: "rgba(0, 255, 0, 0.15)",
+          border: "0.1px solid rgba(0, 255, 0, 0.2)",
+        },
+      });
+      navigate(`/monitor/${monitorDomain}?protocol=${protocol}`, {
+        replace: true,
+      });
+    },
+    onError: (error) => {
+      console.error("Error updating monitor:", error);
+      toast.error("Failed to update monitor", {
+        duration: 3000,
+        richColors: true,
+        style: {
+          backgroundColor: "rgba(255, 0, 0, 0.35)",
+          borderColor: "rgba(255, 0, 0, 0.5)",
+        },
+      });
+    },
+  });
+
+  const setMaintenanceMutation = useMutation({
+    mutationFn: setMaintenance,
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["monitor", monitorDomain] });
+      toast.success(data?.status, {
         duration: 3000,
         richColors: true,
         style: {
@@ -367,6 +421,57 @@ const MonitorIDEdit: React.FC = () => {
     });
   };
 
+  const setMaintenanceSubmit = ({
+    maintenance,
+    protocol,
+    domain,
+  }: {
+    maintenance: boolean;
+    protocol: string;
+    domain: string;
+  }) => {
+    if (!monitorDomain) return;
+
+    const toastLoading = toast.loading(
+      siteInfo?.maintenance
+        ? "Disabling maintenance mode..."
+        : "Enabling maintenance mode...",
+      {
+        style: {
+          backgroundColor: "rgba(0, 120, 255, 0.15)",
+          border: "0.1px solid rgba(0, 120, 255, 0.2)",
+        },
+      },
+    );
+
+    // setMaintenanceMutation.mutate({
+    //   protocol,
+    //   domain,
+    //   maintenance,
+    // });
+
+    setMaintenanceMutation.mutate(
+      {
+        protocol,
+        domain,
+        maintenance,
+      },
+      {
+        onSuccess: () => {
+          toast.dismiss(toastLoading);
+        },
+        onError: (error: any) => {
+          toast.dismiss(toastLoading);
+          toast.error(
+            `Failed to ${
+              siteInfo?.maintenance ? "disable" : "enable"
+            } maintenance mode: ${error.message || "Unknown error"}`,
+          );
+        },
+      },
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -382,140 +487,205 @@ const MonitorIDEdit: React.FC = () => {
   }
 
   return (
-    <InnerLayout
-      label={`Edit ${monitorDomain}`}
-      className="container mx-auto space-y-3 pb-10 pt-0"
-    >
-      <div className="flex flex-col gap-6">
-        <Card className="mt-2 w-full shadow-md">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">
-              Edit Monitor: {form.watch("friendly_name")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6 pt-6">
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="protocol"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Protocol</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
+    <>
+      {tab !== "maintenance" ? (
+        <InnerLayout
+          label={`Edit ${monitorDomain}`}
+          className="container mx-auto space-y-3 pb-10 pt-0"
+        >
+          <div className="flex flex-col gap-6">
+            <Card className="mt-2 w-full shadow-md">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold">
+                  Edit Monitor: {form.watch("friendly_name")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6 pt-6">
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-4"
+                  >
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="protocol"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Protocol</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select protocol" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="http">HTTP</SelectItem>
+                                <SelectItem value="https">HTTPS</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="domain"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Domain</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                id="domain"
+                                className="mt-1.5"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="friendly_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Friendly Name</FormLabel>
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select protocol" />
-                            </SelectTrigger>
+                            <Input {...field} className="mt-1.5" />
                           </FormControl>
-                          <SelectContent>
-                            <SelectItem value="http">HTTP</SelectItem>
-                            <SelectItem value="https">HTTPS</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="domain"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Domain</FormLabel>
-                        <FormControl>
-                          <Input {...field} id="domain" className="mt-1.5" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <FormField
-                  control={form.control}
-                  name="friendly_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Friendly Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} className="mt-1.5" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="tags"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tags</FormLabel>
-                      <FormControl>
-                        <Input {...field} className="mt-1.5" />
-                      </FormControl>
-                      <FormDescription>
-                        Enter tags separated by commas
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="interval"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Check Interval</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select interval" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {intervalOptions.map((interval) => (
-                            <SelectItem key={interval} value={interval}>
-                              {interval}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="tags"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tags</FormLabel>
+                          <FormControl>
+                            <Input {...field} className="mt-1.5" />
+                          </FormControl>
+                          <FormDescription>
+                            Enter tags separated by commas
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="interval"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Check Interval</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select interval" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {intervalOptions.map((interval) => (
+                                <SelectItem key={interval} value={interval}>
+                                  {interval}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
 
-                      <FormMessage />
-                    </FormItem>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </form>
+                </Form>
+              </CardContent>
+              <CardFooter>
+                <Button
+                  onClick={form.handleSubmit(onSubmit)}
+                  disabled={mutation.isPending}
+                >
+                  {mutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    "Save Changes"
                   )}
-                />
-              </form>
-            </Form>
-          </CardContent>
-          <CardFooter>
-            <Button
-              onClick={form.handleSubmit(onSubmit)}
-              disabled={mutation.isPending}
-            >
-              {mutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
-                </>
-              ) : (
-                "Save Changes"
-              )}
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </InnerLayout>
+      ) : (
+        <InnerLayout
+          label={`Edit ${monitorDomain}`}
+          className="container mx-auto w-full space-y-3 pb-10 pt-0"
+          button={
+            <Button className="h-9 w-fit py-0" variant="default">
+              Set Maintenance
             </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    </InnerLayout>
+          }
+        >
+          <div className="mt-1 flex flex-col gap-6">
+            <Card className="mt-2 w-full shadow-md">
+              <CardHeader
+                badgeClassName={cn(
+                  siteInfo?.maintenance
+                    ? "border-green-600 bg-green-600 animate-pulse  "
+                    : !siteInfo?.maintenance
+                      ? "bg-destructive"
+                      : "bg-secondary",
+                )}
+              >
+                <CardTitle className="text-2xl font-bold">
+                  <span className="relative">
+                    Setup Maintenance windows
+                    <span
+                      className="absolute -right-3 bottom-1 h-1.5 w-1.5 rounded-full bg-green-600"
+                      aria-hidden="true"
+                    />
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-6">
+                  <Switch
+                    checked={siteInfo?.maintenance}
+                    onCheckedChange={() => {
+                      setMaintenanceSubmit({
+                        domain: monitorDomain!,
+                        maintenance: !siteInfo?.maintenance,
+                        protocol,
+                      });
+                    }}
+                  />
+                  <P className="text-sm [&:not(:first-child)]:mt-0">
+                    You can set a maintenance window to prevent the monitor from
+                    running in the background.
+                  </P>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button className="h-9 w-fit py-0" variant="default">
+                  Set Maintenance
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </InnerLayout>
+      )}
+    </>
   );
 };
 

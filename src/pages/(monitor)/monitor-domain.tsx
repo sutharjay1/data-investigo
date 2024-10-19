@@ -66,37 +66,44 @@ export const siteDropdownItems = [
     label: "Edit monitor",
     icon: Edit2,
     action: "edit",
+    variant: "default",
   },
 
   {
     label: "Maintenance",
     icon: RiToolsFill,
     action: "maintenance",
+    variant: "default",
   },
   {
     label: "Add tags",
     icon: Tag,
     action: "addTags",
+    variant: "default",
   },
   {
     label: "Add to status page",
     icon: Rss,
     action: "addToStatusPage",
+    variant: "default",
   },
   {
     label: "Clone monitor",
     icon: Copy,
     action: "clone",
+    variant: "default",
   },
   {
     label: "Pause monitor",
     icon: Pause,
     action: "pause",
+    variant: "default",
   },
   {
     label: "Reset stats",
     icon: RotateCcw,
     action: "resetStats",
+    variant: "default",
   },
   {
     label: "Delete monitor",
@@ -104,7 +111,7 @@ export const siteDropdownItems = [
     action: "delete",
     variant: "destructive",
   },
-];
+] as const;
 
 export default function MonitorDomain() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -320,7 +327,7 @@ export default function MonitorDomain() {
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="ghost"
-                              size="sm"
+                              size="icon"
                               className="flex h-8 w-8 justify-center p-0"
                               onClick={(e) => e.stopPropagation()}
                             >
@@ -333,7 +340,7 @@ export default function MonitorDomain() {
                                 key={item.label}
                                 className={cn(
                                   "flex h-9 items-center justify-start gap-2 rounded-md px-2 text-sm text-text/90",
-                                  item.variant === "destructive"
+                                  item?.variant === "destructive"
                                     ? "px-0 text-red-600 hover:text-red-600"
                                     : "hover:text-text",
                                 )}

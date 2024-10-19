@@ -1,4 +1,5 @@
 import Alert from "@/components/global/alert";
+import Hint from "@/components/global/hint";
 import InnerLayout from "@/components/global/inner-layout";
 import {
   AlertDialog,
@@ -26,6 +27,12 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import Ripple from "@/components/ui/ripple";
 import {
   Select,
@@ -43,6 +50,7 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
   Edit,
+  MoreVertical,
   PauseIcon,
   PlayIcon,
   RefreshCcw,
@@ -64,8 +72,8 @@ import {
   YAxis,
 } from "recharts";
 import { toast } from "sonner";
-import { ResponseBody } from "./monitor-domain";
-import Hint from "@/components/global/hint";
+import TagDialog from "./_components/tag-dialog";
+import { ResponseBody, siteDropdownItems } from "./monitor-domain";
 
 export interface SiteInfo {
   id: number;
@@ -129,6 +137,46 @@ const pauseResumeSite = async ({
   return response.data.site_info;
 };
 
+const removeSite = async ({
+  protocol,
+  domain,
+}: {
+  protocol: string;
+  domain: string;
+}) => {
+  const response = await axios.post(
+    `${import.meta.env.VITE_DOMAIN_URL}/remove_site`,
+    { protocol, domain },
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
+      },
+    },
+  );
+  return response.data;
+};
+
+const resetSite = async ({
+  protocol,
+  domain,
+}: {
+  protocol: string;
+  domain: string;
+}) => {
+  const response = await axios.post(
+    `${import.meta.env.VITE_DOMAIN_URL}/reset_site_stats`,
+    { protocol, domain },
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
+      },
+    },
+  );
+  return response.data;
+};
+
 export default function MonitorID() {
   const { id: monitorDomain } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -137,6 +185,7 @@ export default function MonitorID() {
 
   const searchParams = new URLSearchParams(location.search);
   const protocol = searchParams.get("protocol");
+  const tab = searchParams.get("tab");
 
   useEffect(() => {
     if (!searchParams.get("protocol")) {
@@ -254,6 +303,73 @@ export default function MonitorID() {
     });
   };
 
+  const { mutate: deleteMutate } = useMutation({
+    mutationFn: removeSite,
+    onSuccess: () => {
+      refetch();
+      toast.success("Site removed successfully", {
+        duration: 2000,
+        richColors: true,
+        style: {
+          backgroundColor: "rgba(0, 255, 0, 0.15)",
+          border: "0.1px solid rgba(0, 255, 0, 0.2)",
+        },
+      });
+      navigate("/monitor");
+    },
+    onError: () => {
+      toast.error("An error occurred while removing the site.", {
+        duration: 3000,
+        richColors: true,
+        style: {
+          backgroundColor: "rgba(255, 0, 0, 0.35)",
+          borderColor: "rgba(255, 0, 0, 0.5)",
+        },
+      });
+    },
+  });
+
+  const handleDelete = (site: ResponseBody) => {
+    const [url] = site.url;
+    const [protocol, domain] = url.split("://");
+    deleteMutate({ protocol, domain });
+  };
+
+  const { mutate: resetSiteMutate, isPending: isLoadingResetSite } =
+    useMutation({
+      mutationFn: resetSite,
+      onSuccess: (data) => {
+        refetch();
+        toast.success(data.status, {
+          duration: 2000,
+          richColors: true,
+          style: {
+            backgroundColor: "rgba(0, 255, 0, 0.15)",
+            border: "0.1px solid rgba(0, 255, 0, 0.2)",
+          },
+        });
+      },
+      onError: () => {
+        toast.error("An error occurred while resetting the site.", {
+          duration: 3000,
+          richColors: true,
+          style: {
+            backgroundColor: "rgba(255, 0, 0, 0.35)",
+            borderColor: "rgba(255, 0, 0, 0.5)",
+          },
+        });
+      },
+    });
+
+  const handleResetSite = () => {
+    if (!siteInfo) return;
+
+    resetSiteMutate({
+      protocol: protocol!,
+      domain: monitorDomain!,
+    });
+  };
+
   const chartData = siteInfo?.status_records_last_24_hours.map((record) => ({
     timestamp: new Date(record.timestamp).getTime(),
     responseTime: parseFloat(record.response_time.split(" ")[0]),
@@ -368,348 +484,575 @@ export default function MonitorID() {
     }
   };
 
-  const removeSite = async ({
-    protocol,
-    domain,
-  }: {
-    protocol: string;
-    domain: string;
-  }) => {
-    const response = await axios.post(
-      `${import.meta.env.VITE_DOMAIN_URL}/remove_site`,
-      { protocol, domain },
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Accept: "application/json",
-        },
-      },
-    );
-    return response.data;
-  };
-
-  const { mutate: deleteMutate } = useMutation({
-    mutationFn: removeSite,
-    onSuccess: () => {
-      refetch();
-      toast.success("Site removed successfully", {
-        duration: 2000,
-        richColors: true,
-        style: {
-          backgroundColor: "rgba(0, 255, 0, 0.15)",
-          border: "0.1px solid rgba(0, 255, 0, 0.2)",
-        },
-      });
-      navigate("/monitor");
-    },
-  });
-
-  const handleDelete = (site: ResponseBody) => {
-    const [url] = site.url;
-    const [protocol, domain] = url.split("://");
-    deleteMutate({ protocol, domain });
-  };
-
   return (
-    <InnerLayout
-      label="Monitor Details"
-      className="container mx-auto space-y-3 pb-10 pt-0"
-      button={
-        <Button
-          className="h-9 w-fit py-0"
-          variant="default"
-          onClick={handlePauseResume}
-          disabled={pauseResumeMutation.isPending}
-        >
-          {pauseResumeMutation.isPending ? (
-            <>
-              <RiLoader2Fill className="mr-2 h-4 w-4 animate-spin" />
-              <P className="text-sm font-medium text-zinc-100 dark:text-zinc-900 [&:not(:first-child)]:mt-0">
-                {siteInfo?.paused ? "Resuming..." : "Pausing..."}
-              </P>
-            </>
-          ) : (
-            <>
-              {siteInfo?.paused ? (
-                <PlayIcon className="mr-2 h-4 w-4" />
+    <>
+      <InnerLayout
+        label="Monitor Details"
+        className="container mx-auto w-full max-w-7xl space-y-3 pb-10 pt-0"
+        button={
+          <div className="flex items-center gap-2">
+            <Button
+              className="h-9 w-fit py-0"
+              variant="default"
+              onClick={handlePauseResume}
+              disabled={pauseResumeMutation.isPending}
+            >
+              {pauseResumeMutation.isPending ? (
+                <>
+                  <RiLoader2Fill className="mr-2 h-4 w-4 animate-spin" />
+                  <P className="text-sm font-medium text-zinc-100 dark:text-zinc-900 [&:not(:first-child)]:mt-0">
+                    {siteInfo?.paused ? "Resuming..." : "Pausing..."}
+                  </P>
+                </>
               ) : (
-                <PauseIcon className="mr-2 h-4 w-4" />
+                <>
+                  {siteInfo?.paused ? (
+                    <PlayIcon className="mr-2 h-4 w-4" />
+                  ) : (
+                    <PauseIcon className="mr-2 h-4 w-4" />
+                  )}
+                  <P className="text-sm font-medium text-zinc-100 dark:text-zinc-900 [&:not(:first-child)]:mt-0">
+                    {siteInfo?.paused ? "Resume" : "Pause"}
+                  </P>
+                </>
               )}
-              <P className="text-sm font-medium text-zinc-100 dark:text-zinc-900 [&:not(:first-child)]:mt-0">
-                {siteInfo?.paused ? "Resume" : "Pause"}
-              </P>
-            </>
-          )}
-        </Button>
-      }
-    >
-      <P className="max-w-prose pb-4 text-base text-text/90">
-        Detailed information about the monitored domain.
-      </P>
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleResetSite}
+              disabled={isLoadingResetSite}
+            >
+              {isLoadingResetSite ? (
+                <>
+                  <RiLoader2Fill className="mr-2 h-4 w-4 animate-spin" />
+                  <span className="text-sm font-medium">Resetting...</span>
+                </>
+              ) : (
+                <span className="text-sm font-medium">Reset</span>
+              )}
+            </Button>
 
-      <div className="flex flex-col gap-6">
-        <Card className="w-full shadow-md">
-          <CardHeader
-            badgeClassName={cn(
-              siteInfo?.paused === false
-                ? "border-green-600 bg-green-600 animate-pulse  "
-                : siteInfo?.paused === true
-                  ? "bg-destructive"
-                  : "bg-secondary",
-            )}
-            className="px-4 md:px-6"
-          >
-            <CardTitle className="relative flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                {/* <div className="relative flex h-10 w-10 flex-col items-center justify-center">
-                  <Ripple
-                    className="absolute left-0 overflow-hidden rounded-full"
-                    mainCircleSize={16}
-                    numCircles={2}
-                  />
-                </div> */}
-
-                <div className="relative mr-2 h-10 w-10">
-                  <Ripple
-                    numCircles={4}
-                    mainCircleSize={10}
-                    className="pointer-events-none"
-                    circleColor={
-                      siteInfo?.status === "Status Up"
-                        ? "rgba(0, 255, 0, 0.9)"
-                        : "rgba(255, 0, 0, 0.9)"
-                    }
-                  />
-                </div>
-                <P className="text-xl font-bold text-text md:text-2xl [&:not(:first-child)]:mt-0">
-                  Site Monitor Details
-                </P>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Hint
-                  label="Refresh"
-                  side="bottom"
-                  align="start"
-                  alignOffset={-10}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="mx-auto flex justify-center pr-2"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => refetch()}
-                    title="Refresh"
-                    className="flex w-full items-center justify-center gap-4 rounded-md p-2 text-sm text-text/90"
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {siteDropdownItems.map((item) => (
+                  <DropdownMenuItem
+                    key={item.label}
+                    className={cn(
+                      "flex h-9 items-center justify-start gap-2 rounded-md px-2 text-sm text-text/90",
+                      item.variant === "destructive"
+                        ? "px-0 text-red-600 hover:text-red-600"
+                        : "hover:text-text",
+                    )}
                   >
-                    <RefreshCcw className="h-4 w-4" />
-                  </Button>
-                </Hint>
-                <Hint label="Edit" side="bottom" align="center" alignOffset={5}>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => navigate(`/monitor/${monitorDomain}/edit`)}
-                    title="Edit"
-                    className="flex w-full items-center justify-center gap-4 rounded-md p-2 text-sm text-text/90"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                </Hint>
+                    {item.label === "Delete monitor" ? (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="flex h-9 w-full items-center justify-start gap-4 rounded-md p-2 text-sm text-text/90"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                            Delete
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Are you absolutely sure?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will
+                              permanently delete the monitor for {siteInfo?.url}
+                              .
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => {
+                                if (item.variant === "destructive") {
+                                  handleDelete({
+                                    created_at: siteInfo!.created_at,
+                                    id: siteInfo!.id,
+                                    friendly_name: siteInfo!.friendly_name,
+                                    url: siteInfo!.url,
+                                    interval: siteInfo!.interval,
+                                    paused: siteInfo!.paused,
+                                    last_checked: siteInfo!.last_checked,
+                                    maintenance: siteInfo!.maintenance,
+                                    name: siteInfo!.name,
+                                    status: siteInfo!.status,
+                                    tags: siteInfo!.tags,
+                                  });
+                                }
+                              }}
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    ) : item.label === "Add tags" ? (
+                      <TagDialog
+                        label={siteDropdownItems[2].label}
+                        site={siteInfo!}
+                      />
+                    ) : (
+                      <>
+                        <item.icon className="mr-2 h-4 w-4" />
+                        {item.label}
+                      </>
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        }
+        parentClassName="max-w-7xl"
+      >
+        <P className="max-w-prose pb-4 text-base text-text/90">
+          Detailed information about the monitored domain.
+        </P>
 
-                <AlertDialog>
-                  <Hint
-                    label="Delete"
-                    side="bottom"
-                    align="end"
-                    alignOffset={10}
-                  >
-                    <AlertDialogTrigger asChild>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="col-span-2 flex flex-col gap-6">
+            <Card className="w-full shadow-md">
+              <CardHeader
+                badgeClassName={cn(
+                  siteInfo?.paused === false
+                    ? "border-green-600 bg-green-600 animate-pulse  "
+                    : siteInfo?.paused === true
+                      ? "bg-destructive"
+                      : "bg-secondary",
+                )}
+                className="px-4 md:px-6"
+              >
+                <CardTitle className="relative flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    {/* <div className="relative flex h-10 w-10 flex-col items-center justify-center">
+                <Ripple
+                  className="absolute left-0 overflow-hidden rounded-full"
+                  mainCircleSize={16}
+                  numCircles={2}
+                />
+              </div> */}
+
+                    <div className="relative mr-2 h-10 w-10">
+                      <Ripple
+                        numCircles={4}
+                        mainCircleSize={10}
+                        className="pointer-events-none"
+                        circleColor={
+                          siteInfo?.status === "Status Up"
+                            ? "rgba(0, 255, 0, 0.9)"
+                            : "rgba(255, 0, 0, 0.9)"
+                        }
+                      />
+                    </div>
+                    <P className="text-xl font-bold text-text md:text-2xl [&:not(:first-child)]:mt-0">
+                      Site Monitor Details
+                    </P>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Hint
+                      label="Refresh"
+                      side="bottom"
+                      align="start"
+                      alignOffset={-10}
+                    >
                       <Button
                         variant="outline"
                         size="icon"
+                        onClick={() => refetch()}
+                        title="Refresh"
                         className="flex w-full items-center justify-center gap-4 rounded-md p-2 text-sm text-text/90"
-                        onClick={(e) => e.stopPropagation()}
                       >
-                        <TrashIcon className="h-4 w-4 text-red-600" />
+                        <RefreshCcw className="h-4 w-4" />
                       </Button>
-                    </AlertDialogTrigger>
-                  </Hint>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Are you absolutely sure?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action cannot be undone. This will permanently
-                        delete the monitor for {siteInfo?.url}.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => {
-                          handleDelete(siteInfo!);
-                        }}
+                    </Hint>
+                    <Hint
+                      label="Edit"
+                      side="bottom"
+                      align="center"
+                      alignOffset={5}
+                    >
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() =>
+                          navigate(`/monitor/${monitorDomain}/edit`)
+                        }
+                        title="Edit"
+                        className="flex w-full items-center justify-center gap-4 rounded-md p-2 text-sm text-text/90"
                       >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-4">
-                <Skeleton className="h-6 w-[75%]" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-16 w-full" />
-              </div>
-            ) : isError ? (
-              <Alert description={error.message} title="Error" type="error" />
-            ) : siteInfo ? (
-              <div className="space-y-4">
-                <div>
-                  <P className="text-xl font-semibold">{siteInfo.name}</P>
-                  <P className="text-sm text-muted-foreground">
-                    {siteInfo.url[0]}
-                  </P>
-                </div>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <P className="font-semibold">Status</P>
-                    <Badge
-                      variant={
-                        siteInfo.status === "Status Up"
-                          ? "success"
-                          : siteInfo.status === "Status Down"
-                            ? "destructive"
-                            : "secondary"
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </Hint>
+
+                    <AlertDialog>
+                      <Hint
+                        label="Delete"
+                        side="bottom"
+                        align="end"
+                        alignOffset={10}
+                      >
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="flex w-full items-center justify-center gap-4 rounded-md p-2 text-sm text-text/90"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <TrashIcon className="h-4 w-4 text-red-600" />
+                          </Button>
+                        </AlertDialogTrigger>
+                      </Hint>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Are you absolutely sure?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete the monitor for {siteInfo?.url}.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => {
+                              handleDelete(siteInfo!);
+                            }}
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-6 w-[75%]" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                  </div>
+                ) : isError ? (
+                  <Alert
+                    description={error.message}
+                    title="Error"
+                    type="error"
+                  />
+                ) : siteInfo ? (
+                  <div className="space-y-4">
+                    <div>
+                      <P className="text-xl font-semibold">{siteInfo.name}</P>
+                      <P className="text-sm text-muted-foreground">
+                        {siteInfo.url[0]}
+                      </P>
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <P className="font-semibold">Status</P>
+                        <Badge
+                          variant={
+                            siteInfo.status === "Status Up"
+                              ? "success"
+                              : siteInfo.status === "Status Down"
+                                ? "destructive"
+                                : "secondary"
+                          }
+                        >
+                          {siteInfo.status}
+                        </Badge>
+                      </div>
+                      <div>
+                        <P className="font-semibold">Last Checked</P>
+                        <P className="[&:not(:first-child)]:mt-0">
+                          {siteInfo.last_checked
+                            ? new Date(siteInfo.last_checked).toLocaleString()
+                            : "N/A"}
+                        </P>
+                      </div>
+                      <div>
+                        <P className="font-semibold">Check Interval</P>
+                        <P className="[&:not(:first-child)]:mt-0">
+                          {siteInfo.interval} seconds
+                        </P>
+                      </div>
+                      <div>
+                        <P className="font-semibold">Next Check</P>
+                        <P className="[&:not(:first-child)]:mt-0">
+                          {siteInfo.next_check_time}
+                        </P>
+                      </div>
+                      <div>
+                        <P className="font-semibold">Response Time</P>
+                        <P className="[&:not(:first-child)]:mt-0">
+                          Min: {siteInfo.response_time.min}, Max:{" "}
+                          {siteInfo.response_time.max}, Avg:{" "}
+                          {siteInfo.response_time.avg}
+                        </P>
+                      </div>
+                      <div>
+                        <P className="font-semibold">Tags</P>
+                        <P className="[&:not(:first-child)]:mt-0">
+                          {siteInfo.tags.length > 0
+                            ? siteInfo.tags.join(", ")
+                            : "No tags"}
+                        </P>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-4 text-center">
+                    No information available for this monitor.
+                  </div>
+                )}
+              </CardContent>
+              <CardFooter>
+                <P className="text-sm text-muted-foreground">
+                  Monitor created on:{" "}
+                  {siteInfo
+                    ? new Date(siteInfo.created_at).toLocaleString()
+                    : "N/A"}
+                </P>
+              </CardFooter>
+            </Card>
+
+            {/* {!siteInfo?.paused && (
+              <Card className="h-fit">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="text-2xl font-bold">
+                      Response Time Chart
+                    </span>
+                    <Select
+                      value={selectedChart}
+                      onValueChange={(value) =>
+                        setSelectedChart(value as typeof selectedChart)
                       }
                     >
-                      {siteInfo.status}
-                    </Badge>
-                  </div>
-                  <div>
-                    <P className="font-semibold">Last Checked</P>
-                    <P className="[&:not(:first-child)]:mt-0">
-                      {siteInfo.last_checked
-                        ? new Date(siteInfo.last_checked).toLocaleString()
-                        : "N/A"}
-                    </P>
-                  </div>
-                  <div>
-                    <P className="font-semibold">Check Interval</P>
-                    <P className="[&:not(:first-child)]:mt-0">
-                      {siteInfo.interval} seconds
-                    </P>
-                  </div>
-                  <div>
-                    <P className="font-semibold">Next Check</P>
-                    <P className="[&:not(:first-child)]:mt-0">
-                      {siteInfo.next_check_time}
-                    </P>
-                  </div>
-                  <div>
-                    <P className="font-semibold">Response Time</P>
-                    <P className="[&:not(:first-child)]:mt-0">
-                      Min: {siteInfo.response_time.min}, Max:{" "}
-                      {siteInfo.response_time.max}, Avg:{" "}
-                      {siteInfo.response_time.avg}
-                    </P>
-                  </div>
-                  <div>
-                    <P className="font-semibold">Tags</P>
-                    <P className="[&:not(:first-child)]:mt-0">
-                      {siteInfo.tags.length > 0
-                        ? siteInfo.tags.join(", ")
-                        : "No tags"}
-                    </P>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="py-4 text-center">
-                No information available for this monitor.
-              </div>
-            )}
-          </CardContent>
-          <CardFooter>
-            <P className="text-sm text-muted-foreground">
-              Monitor created on:{" "}
-              {siteInfo
-                ? new Date(siteInfo.created_at).toLocaleString()
-                : "N/A"}
-            </P>
-          </CardFooter>
-        </Card>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select chart type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="line">Line Chart</SelectItem>
+                        <SelectItem value="area">Area Chart</SelectItem>
+                        <SelectItem value="bar">Bar Chart</SelectItem>
+                        <SelectItem value="gradient">
+                          Gradient Area Chart
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="h-full">
+                  {isLoading ? (
+                    <Skeleton className="h-64 w-full" />
+                  ) : isError ? (
+                    <Alert
+                      description={error.message}
+                      title="Error"
+                      type="error"
+                    />
+                  ) : siteInfo ? (
+                    <ChartContainer
+                      config={{
+                        responseTime: {
+                          label: "Response Time",
+                          color: "hsl(var(--chart-1))",
+                        },
+                        baseline: {
+                          label: "Baseline",
+                          color: "hsl(var(--chart-2))",
+                        },
+                        average: {
+                          label: "Average",
+                          color: "hsl(var(--chart-3))",
+                        },
+                      }}
+                    >
+                      <ResponsiveContainer
+                        width="100%"
+                        height="100%"
+                        className="-ml-4 w-full"
+                      >
+                        {renderChart() || <div>No chart data available</div>}
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  ) : null}
+                </CardContent>
+                {siteInfo && (
+                  <CardFooter>
+                    <ResponseTimeStats
+                      min={siteInfo.response_time.min}
+                      max={siteInfo.response_time.max}
+                      avg={siteInfo.response_time.avg}
+                    />
+                  </CardFooter>
+                )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span className="text-2xl font-bold">Response Time Chart</span>
-              <Select
-                value={selectedChart}
-                onValueChange={(value) =>
-                  setSelectedChart(value as typeof selectedChart)
-                }
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select chart type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="line">Line Chart</SelectItem>
-                  <SelectItem value="area">Area Chart</SelectItem>
-                  <SelectItem value="bar">Bar Chart</SelectItem>
-                  <SelectItem value="gradient">Gradient Area Chart</SelectItem>
-                </SelectContent>
-              </Select>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-full">
-            <ChartContainer
-              config={{
-                responseTime: {
-                  label: "Response Time",
-                  color: "hsl(var(--chart-1))",
-                },
-                baseline: { label: "Baseline", color: "hsl(var(--chart-2))" },
-                average: { label: "Average", color: "hsl(var(--chart-3))" },
-              }}
-            >
-              <ResponsiveContainer
-                width="100%"
-                height="100%"
-                className="-ml-4 w-full"
-              >
-                {renderChart() ?? <div>No chart data available</div>}
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
-          <CardFooter>
-            {siteInfo && (
-              <ResponseTimeStats
-                min={siteInfo.response_time.min}
-                max={siteInfo.response_time.max}
-                avg={siteInfo.response_time.avg}
-              />
+              </Card>
+            )} */}
+
+            {!siteInfo?.paused && (
+              <Card className="h-fit">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="text-2xl font-bold">
+                      Response Time Chart
+                    </span>
+                    <Select
+                      value={selectedChart}
+                      onValueChange={(value) =>
+                        setSelectedChart(value as typeof selectedChart)
+                      }
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select chart type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="line">Line Chart</SelectItem>
+                        <SelectItem value="area">Area Chart</SelectItem>
+                        <SelectItem value="bar">Bar Chart</SelectItem>
+                        <SelectItem value="gradient">
+                          Gradient Area Chart
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="h-full">
+                  {isLoading ? (
+                    <Skeleton className="h-64 w-full" />
+                  ) : isError ? (
+                    <Alert
+                      description={error.message || "An error occurred"}
+                      title="Error"
+                      type="error"
+                    />
+                  ) : siteInfo ? (
+                    <ChartContainer
+                      config={{
+                        responseTime: {
+                          label: "Response Time",
+                          color: "hsl(var(--chart-1))",
+                        },
+                        baseline: {
+                          label: "Baseline",
+                          color: "hsl(var(--chart-2))",
+                        },
+                        average: {
+                          label: "Average",
+                          color: "hsl(var(--chart-3))",
+                        },
+                      }}
+                    >
+                      <ResponsiveContainer
+                        width="100%"
+                        height="100%"
+                        className="-ml-4 w-full"
+                      >
+                        {renderChart() || <div>No chart data available</div>}
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  ) : (
+                    <div>No site information available</div>
+                  )}
+                </CardContent>
+                <CardFooter>
+                  {siteInfo?.response_time.max &&
+                    siteInfo?.response_time.avg &&
+                    siteInfo?.response_time.min && (
+                      <ResponseTimeStats
+                        min={siteInfo.response_time.min}
+                        max={siteInfo.response_time.max}
+                        avg={siteInfo.response_time.avg}
+                      />
+                    )}
+                </CardFooter>
+              </Card>
             )}
-          </CardFooter>
-        </Card>
-      </div>
-    </InnerLayout>
+          </div>
+          <div className="col-span-1">
+            <Card className="">
+              <CardHeader>
+                <CardTitle>Maintenance</CardTitle>
+              </CardHeader>
+              <CardContent className="h-fit">
+                <div className="flex items-center justify-between">
+                  <P className="font-semibold">Status:</P>
+                  <Badge
+                    variant={siteInfo?.maintenance ? "warning" : "success"}
+                  >
+                    {siteInfo?.maintenance ? "In Maintenance" : "Operational"}
+                  </Badge>
+                </div>
+                {siteInfo?.maintenance && (
+                  <div className="mt-4">
+                    <P className="font-semibold">Maintenance Details:</P>
+                    <P className="mt-2 text-sm text-muted-foreground">
+                      The site is currently undergoing scheduled maintenance. We
+                      apologize for any inconvenience.
+                    </P>
+                  </div>
+                )}
+              </CardContent>
+              <CardFooter>
+                <Button
+                  className="w-full"
+                  variant={siteInfo?.maintenance ? "destructive" : "default"}
+                  onClick={() => {
+                    const param = new URLSearchParams();
+                    param.append("tab", "maintenance");
+                    navigate(
+                      `/monitor/${monitorDomain}/edit?${param.toString()}`,
+                    );
+                  }}
+                >
+                  {siteInfo?.maintenance
+                    ? "End Maintenance"
+                    : "Start Maintenance"}
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      </InnerLayout>
+    </>
   );
 }
 
-interface ResponseTimeProps {
+interface ResponseTimeStatsProps {
   min: string;
   max: string;
   avg: string;
 }
 
-function ResponseTimeStats({ min, max, avg }: ResponseTimeProps) {
+const ResponseTimeStats: React.FC<ResponseTimeStatsProps> = ({
+  min,
+  max,
+  avg,
+}) => {
   return (
-    <CardBody className="flex w-full flex-col items-center justify-center gap-4 rounded-lg border-y-0 px-2 md:flex-row md:justify-between md:px-4">
+    <CardBody className="flex w-full flex-col items-center justify-center gap-4 rounded-lg border-y-0 px-2 md:flex-row md:justify-between">
       <div className="flex w-full items-center gap-2 md:w-auto md:items-center">
         <WavesIcon className="h-8 w-12 text-blue-400" />
         <div className="flex flex-col">
@@ -735,4 +1078,4 @@ function ResponseTimeStats({ min, max, avg }: ResponseTimeProps) {
       </div>
     </CardBody>
   );
-}
+};
