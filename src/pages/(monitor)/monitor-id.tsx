@@ -54,10 +54,11 @@ import {
   PauseIcon,
   PlayIcon,
   RefreshCcw,
+  Tag,
   TrashIcon,
   WavesIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RiLoader2Fill } from "react-icons/ri";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
@@ -74,6 +75,8 @@ import {
 import { toast } from "sonner";
 import TagDialog from "./_components/tag-dialog";
 import { ResponseBody, siteDropdownItems } from "./monitor-domain";
+import { useModal } from "@/hooks/use-modal";
+import { useOnClickOutside } from "@/hooks/use-click-outside";
 
 export interface SiteInfo {
   id: number;
@@ -186,6 +189,7 @@ export default function MonitorID() {
   const searchParams = new URLSearchParams(location.search);
   const protocol = searchParams.get("protocol");
   const tab = searchParams.get("tab");
+  const { type, isOpen, onClose, onOpen } = useModal();
 
   useEffect(() => {
     if (!searchParams.get("protocol")) {
@@ -483,12 +487,17 @@ export default function MonitorID() {
         return null;
     }
   };
+  const tagDialogRef = useRef<HTMLDivElement | null>(null);
+
+  useOnClickOutside(tagDialogRef, () => {
+    onClose();
+  });
 
   return (
     <>
       <InnerLayout
         label="Monitor Details"
-        className="container mx-auto w-full max-w-7xl space-y-3 pb-10 pt-0"
+        className="container relative mx-auto w-full max-w-7xl space-y-3 pb-10 pt-0"
         button={
           <div className="flex items-center gap-2">
             <Button
@@ -605,10 +614,23 @@ export default function MonitorID() {
                         </AlertDialogContent>
                       </AlertDialog>
                     ) : item.label === "Add tags" ? (
-                      <TagDialog
-                        label={siteDropdownItems[2].label}
-                        site={siteInfo!}
-                      />
+                      // <TagDialog
+                      //   label={siteDropdownItems[2].label}
+                      //   site={siteInfo!}
+                      // />
+
+                      <Button
+                        variant="ghost"
+                        className="w-full gap-2 px-0 hover:bg-primary/20"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onOpen("TAGS");
+                        }}
+                      >
+                        <Tag className="mr-2 h-4 w-4" />
+                        Add tags
+                      </Button>
                     ) : (
                       <>
                         <item.icon className="mr-2 h-4 w-4" />
@@ -626,6 +648,15 @@ export default function MonitorID() {
         <P className="max-w-prose pb-4 text-base text-text/90">
           Detailed information about the monitored domain.
         </P>
+
+        {type === "TAGS" && (
+          <TagDialog
+            site={siteInfo!}
+            ref={tagDialogRef}
+            protocol={protocol!}
+            refetchSiteInfo={refetch}
+          />
+        )}
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="col-span-2 flex flex-col gap-6">
